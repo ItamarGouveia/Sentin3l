@@ -5,33 +5,9 @@
 
 ---
 
-## Estrutura do Projeto
-
-```
-sentin3l/
-├── agent/      # Código do agente que roda no PC do cliente
-│   ├── main.go
-│   ├── help.go
-│   ├── metrics.go
-│   ├── config.go
-│   └── agentid.go
-├── server/     # Código do servidor/API que recebe métricas
-│   ├── main.go
-│   ├── routes.go
-│   └── db.go (opcional, se usar banco)
-├── client/     # Dashboard ou painel de monitoramento (React/Fyne)
-│   ├── package.json
-│   ├── src/
-│   └── public/
-├── rmm.json    # Arquivo de configuração padrão do agente
-└── README.md
-```
-
----
-
 ## Funcionalidades
 
-- Coleta de métricas pelo agente:
+- Coleta de métricas:
   - CPU, memória, disco
   - Rede (bytes enviados/recebidos)
   - Processos ativos
@@ -42,45 +18,36 @@ sentin3l/
 - Flags de linha de comando para sobrescrever configurações
 - Intervalo de coleta configurável
 - Logs detalhados opcionais
-- Servidor API para receber métricas
-- Dashboard (React ou Fyne) para visualização
 
 ---
 
 ## Instalação
 
-### Agent
+1. Clone o repositório:
 
 ```bash
-cd agent
+git clone https://github.com/seu-usuario/sentin3l.git
+cd sentin3l
+```
+
+2. Instale dependências:
+
+```bash
 go get github.com/shirou/gopsutil/...
 go get github.com/google/uuid
+```
+
+3. Compile o agente:
+
+```bash
 go build -o sentin3l
-```
-
-### Server
-
-```bash
-cd server
-go get github.com/gin-gonic/gin
-go build -o server
-```
-
-### Client
-
-Se for React:
-
-```bash
-cd client
-npm install
-npm start
 ```
 
 ---
 
-## Configuração do Agente
+## Configuração
 
-Crie um arquivo `rmm.json` na pasta raiz ou dentro de `agent/`:
+Crie um arquivo `rmm.json` na mesma pasta do executável:
 
 ```json
 {
@@ -103,15 +70,15 @@ Crie um arquivo `rmm.json` na pasta raiz ou dentro de `agent/`:
 
 ---
 
-## Uso do Agente
+## Uso
 
-Executando com configurações padrão:
+Executando o agente com configurações padrão do `rmm.json`:
 
 ```bash
 ./sentin3l
 ```
 
-Sobrescrevendo via flags:
+Sobrescrevendo configurações via flags:
 
 ```bash
 ./sentin3l -server http://meuservidor:8080/api/metrics -interval 10 -verbose
@@ -119,20 +86,53 @@ Sobrescrevendo via flags:
 
 ### Flags disponíveis
 
-- `-interval <segundos>` → Intervalo de envio das métricas  
-- `-server <url>` → URL do servidor  
+- `-interval <segundos>` → Intervalo de envio das métricas (sobrescreve o JSON)  
+- `-server <url>` → URL do servidor (sobrescreve o JSON)  
 - `-verbose` → Ativa logs detalhados  
 - `-version` → Mostra versão do agente  
 - `-help` → Mostra ajuda  
 
 ---
 
+## Estrutura do Projeto
+
+```
+sentin3l/
+├── main.go       # Loop principal do agente
+├── help.go       # Processa flags e mostra ajuda
+├── config.go     # Lê rmm.json e aplica configuração
+├── metrics.go    # Coleta métricas do sistema
+├── agentid.go    # Gera e mantém AgentID persistente
+├── go.mod
+└── rmm.json      # Arquivo de configuração
+```
+
+---
+
+## Exemplos de Saída
+
+### No servidor
+
+```text
+[2025-08-28T09:00:00] Métricas recebidas: {AgentID:PC-1234 Hostname:itapc OS:linux CPUPercent:12.5 MemPercent:28.5 DiskPercent:8.3 Timestamp:2025-08-28T09:00:00}
+```
+
+### No agente (verbose)
+
+```text
+Servidor: http://localhost:8080/api/metrics
+Intervalo: 5 segundos
+Métricas enviadas com status: 200
+```
+
+---
+
 ## Roadmap
 
-- [ ] Autenticação com token no envio de métricas  
+- [ ] Adicionar autenticação com token no envio de métricas  
 - [ ] Coleta de softwares e serviços específicos do SO  
-- [ ] Dashboard web interativo  
-- [ ] Compilação multiplataforma  
+- [ ] Implementar dashboard web (React ou Fyne)  
+- [ ] Compilação multiplataforma (Windows, Linux, MacOS)  
 - [ ] Inicialização automática como serviço  
 
 ---
